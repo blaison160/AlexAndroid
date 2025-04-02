@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Alex</string>
+    <string name="feedButton">Nourris Alex</string>
+    <string name="cmdButton">Mises à jour</string>
+</resources>
