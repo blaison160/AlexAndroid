@@ -1,6 +1,6 @@
-package com.example.alex
+package com.example.alex.alexMood
 
-enum class Mood {
+enum class MoodEnum {
     NEUTRAL,
     NEUTRAL_HAPPY,
     BLINK,
