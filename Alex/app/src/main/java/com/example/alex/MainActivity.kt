@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,30 +24,43 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.alex.management.Health.getHealthRepresentation
 import com.example.alex.management.MoodEnum
-import com.example.alex.management.Mood.getMoodRepresentation
-import com.example.alex.management.Mood
+import com.example.alex.management.MoodFunctions.getMoodRepresentation
+import com.example.alex.management.MoodFunctions
+import com.example.alex.management.MoodViewModel
 import com.example.alex.ui.theme.AlexTheme
 
 
@@ -72,38 +86,48 @@ fun Greeting(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun DisplayMainPage(modifier: Modifier = Modifier){
+fun DisplayMainPage(modifier: Modifier, currentMood: MoodViewModel = viewModel()){
     val context = LocalContext.current
     val health = rememberSaveable { mutableIntStateOf(6) }
     val maxSizeVersionBar = 30
     val versionSupportTime = rememberSaveable { mutableIntStateOf(maxSizeVersionBar) }
     val maxSizeHungerBar = 10
     val hunger = rememberSaveable { mutableIntStateOf(maxSizeHungerBar)}
-    val currentMood = rememberSaveable { mutableStateOf(MoodEnum.NEUTRAL) }
-    currentMood.value = Mood.getMoodFromHealth(health.intValue)
+    currentMood.updateCurrentMood(MoodFunctions.getMoodFromHealth(health.intValue))
     val shell = rememberSaveable { mutableStateOf(false) }
-    val shellStrings = rememberSaveable { mutableListOf("") }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = modifier
-                    .fillMaxWidth(0.5F)
-            ) {
+    val shellStrings = remember { mutableStateListOf(String()) }
+    shellStrings.remove("")
+    shellStrings.add(stringResource(R.string.greetings))
+    shellStrings.add(stringResource(R.string.typeHelp))
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box{
                 DisplayFace(currentMood, modifier)
             }
-            Column(
-                modifier = modifier
-                    .fillMaxWidth(0.5F)
-                    .padding(2.dp)
-            ){
+            Column {
                 DisplayHeart(health, modifier)
-                DisplayHungerBar(maxSizeHungerBar, hunger, modifier)
-                DisplayVersionBar(maxSizeVersionBar, versionSupportTime, modifier)
+
             }
         }
-        DisplayInteractionsMenu(currentMood, context, health, hunger, versionSupportTime, modifier)
-
-        DisplayActivity(currentMood, context, versionSupportTime, shell, modifier)
+        DisplayInteractionsMenu(currentMood, context, shell, health, hunger, versionSupportTime, modifier)
+        Box(
+            //modifier.fillMaxHeight(0.6F)
+        ) {
+            DisplayActivity(
+                currentMood,
+                context,
+                versionSupportTime,
+                shell,
+                shellStrings,
+                hunger,
+                modifier
+            )
+        }
     }
 }
 
@@ -112,89 +136,79 @@ fun DisplayMainPage(modifier: Modifier = Modifier){
 @Composable
 fun DisplayHeart(health: MutableIntState, modifier: Modifier) {
     val heart = getHealthRepresentation(health.intValue)
-    Box(
-        modifier = modifier.fillMaxHeight(0.3F)
-    ) {
+    Box{
         Image(
             painter = heart,
-            contentDescription = "heart",
-            modifier = modifier.fillMaxSize()
+            contentDescription = "heart"
         )
     }
 }
 
 @Composable
 fun DisplayHungerBar(maxSizeHungerBar: Int, hunger: MutableIntState, modifier: Modifier) {
-    Box(
 
-        modifier.wrapContentSize()
-            .border(BorderStroke(2.dp, MaterialTheme.colorScheme.secondary))
-    ) {
         LinearProgressIndicator(
             progress = { hunger.intValue.toFloat() / maxSizeHungerBar },
             color = Color(0xFFFF9800),
             trackColor = MaterialTheme.colorScheme.tertiary,
             strokeCap = StrokeCap.Square,
             drawStopIndicator = {},
-            modifier = modifier.height(10.dp)
+            modifier = modifier.height(15.dp)
         )
     }
-}
+
 
 @Composable
 fun DisplayVersionBar(maxSizeVersionBar: Int, versionSupportTime: MutableIntState, modifier: Modifier) {
-    Box(
-
-        modifier.wrapContentSize()
-            .border(BorderStroke(2.dp, MaterialTheme.colorScheme.secondary))
-    ) {
-        LinearProgressIndicator(
-            progress = { versionSupportTime.intValue.toFloat() / maxSizeVersionBar },
-            color = Color(0xFF03A9F4),
-            trackColor = MaterialTheme.colorScheme.tertiary,
-            strokeCap = StrokeCap.Square,
-            drawStopIndicator = {},
-            modifier = modifier.height(10.dp)
-        )
-    }
+    LinearProgressIndicator(
+        progress = { versionSupportTime.intValue.toFloat() / maxSizeVersionBar },
+        color = Color(0xFF03A9F4),
+        trackColor = MaterialTheme.colorScheme.tertiary,
+        strokeCap = StrokeCap.Square,
+        drawStopIndicator = {},
+        modifier = modifier.height(15.dp)
+            .padding(2.dp)
+    )
 }
 
 @Composable
-fun DisplayFace(currentMood: MutableState<MoodEnum>, modifier: Modifier) {
-    val expression = getMoodRepresentation(currentMood.value)
-    Box(
-        modifier.fillMaxHeight(0.30f)
-    ) {
+fun DisplayFace(currentMood: MoodViewModel, modifier: Modifier) {
+    val expression = getMoodRepresentation(currentMood.getCurrentMood())
+    Box{
         Image(
             painter = painterResource(R.drawable.background),
             contentDescription = "background",
-            modifier.fillMaxSize()
+            modifier.padding(4.dp)
                 .wrapContentSize()
-                .border(BorderStroke(2.dp, MaterialTheme.colorScheme.secondary))
+                .border(BorderStroke(4.dp, MaterialTheme.colorScheme.secondary))
         )
         Image(
             painter = expression,
             contentDescription = "Alex's face",
-            modifier.fillMaxSize()
+            modifier.padding(4.dp)
         )
     }
 }
 
 @Composable
-fun DisplayInteractionsMenu(currentMood: MutableState<MoodEnum>,context: Context, health: MutableIntState, hunger: MutableIntState, version: MutableIntState, modifier: Modifier) {
+fun DisplayInteractionsMenu(currentMood: MoodViewModel, context: Context, shell: MutableState<Boolean>, health: MutableIntState, hunger: MutableIntState, version: MutableIntState, modifier: Modifier) {
+    val feedEnabled = rememberSaveable { mutableStateOf(true) }//todo : check for food & change icon
     Row{
-        Button(onClick = {
-            hunger.intValue--
-            val initialMood = currentMood.value
-            currentMood.value = Mood.getHappierMood(currentMood.value) //get the happier face
-            val handler = Handler(Looper.getMainLooper())
-            val runnable = Runnable{
-                currentMood.value =initialMood
-            }
-            handler.postDelayed(runnable,2000)
-        },
+        Button(
+            enabled = feedEnabled.value,
+            onClick = {
+                feedEnabled.value = false
+                val initialMood = currentMood.getCurrentMood()
+                currentMood.updateCurrentMood(MoodFunctions.getHappierMood(initialMood)) //get the happier face
+                val handler = Handler(Looper.getMainLooper())
+                val runnable = Runnable{
+                    currentMood.updateCurrentMood(initialMood)
+                    feedEnabled.value=true
+                }
+                handler.postDelayed(runnable,2000)
+            },
             shape = RectangleShape,
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary)
+            border = BorderStroke(4.dp, MaterialTheme.colorScheme.secondary)
             ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.food_apple),
@@ -203,14 +217,18 @@ fun DisplayInteractionsMenu(currentMood: MutableState<MoodEnum>,context: Context
             )
 
         }
+        var icon = R.drawable.baseline_terminal_24
+        if(shell.value){
+            icon = R.drawable.tree_outline
+        }
         Button(onClick = {
-            version.intValue--
+            shell.value = !shell.value
         },
             shape = RectangleShape,
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary)
+            border = BorderStroke(4.dp, MaterialTheme.colorScheme.secondary)
         ) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.baseline_terminal_24),
+                imageVector = ImageVector.vectorResource(icon),
                 contentDescription = "terminal icon",
                 tint = MaterialTheme.colorScheme.tertiary
             )
@@ -220,31 +238,82 @@ fun DisplayInteractionsMenu(currentMood: MutableState<MoodEnum>,context: Context
 
 @Composable
 fun DisplayActivity(
-    mood: MutableState<MoodEnum>,
+    mood: MoodViewModel,
     context: Context,
     version: MutableIntState,
     shell: MutableState<Boolean>,
+    shellContent: MutableList<String>,
+    hunger: MutableIntState,
     modifier: Modifier
 ) {
     if(shell.value){
-        DisplayShell(mood, context, version, modifier)
+        DisplayShell(mood, context, version, shellContent)
     }
     else{
-        DisplayGarden(mood, context, version, modifier)
+        DisplayGarden(context, hunger, modifier)
     }
 }
 
 
 
 @Composable
-fun DisplayShell(x0: MutableState<MoodEnum>, x1: Context, x2: MutableIntState, modifier: Modifier) {
-    Text(
-        text = "terminal"
-    )
+fun DisplayShell(
+    mood: MoodViewModel,
+    context: Context,
+    version: MutableIntState,
+    shellContent: MutableList<String>
+) {
+    val textList = shellContent
+    var input by remember { mutableStateOf(TextFieldValue("")) }
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .border(4.dp, MaterialTheme.colorScheme.secondary)
+                .padding(4.dp)
+                .background(Color.Black)
+                .fillMaxWidth()
+                .fillMaxHeight()
+        ) {
+            Column(
+                horizontalAlignment = Alignment.Start
+            ) {
+                textList.forEach { text ->
+                    Text(
+                        text = text,
+                        color = Color.Green
+                    )
+                }
+            }
+        }
+        OutlinedTextField(
+            value = input,
+            onValueChange = { input = it },//todo : update list with command+result
+            maxLines = 1,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.Green,
+                unfocusedTextColor = Color.Green,
+                focusedContainerColor = Color.Black,
+                unfocusedContainerColor = Color.Black,
+                focusedBorderColor = Color.White,
+                unfocusedBorderColor = Color.Gray
+            )
+        )
+        Button(
+            onClick = {
+                val transformedText = input.text.lowercase().replace(" ","")
+                println(transformedText)
+                input = TextFieldValue("")
+            }
+        ) {
+            Text("OK")
+        }
+    }
 }
 
 @Composable
-fun DisplayGarden(x0: MutableState<MoodEnum>, x1: Context, x2: MutableIntState, modifier: Modifier) {
+fun DisplayGarden(context: Context, hunger: MutableIntState, modifier: Modifier) {
     Text(
         text = "garden"
     )

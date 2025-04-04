@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Alex</string>
+    <string name="greetings">Hi, I am Alex !</string>
+    <string name="typeHelp">Type \'Help\' to get started.</string>
 </resources>

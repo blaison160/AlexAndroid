@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import com.example.alex.R
 
-object Mood {
+object MoodFunctions {
     @Composable
     fun getMoodRepresentation(mood: MoodEnum) = when(mood){
             MoodEnum.NEUTRAL -> painterResource(R.drawable.neutral)
