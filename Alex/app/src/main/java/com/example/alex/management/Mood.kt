@@ -1,4 +1,4 @@
-package com.example.alex.alexMood
+package com.example.alex.management
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
@@ -25,23 +25,32 @@ object Mood {
             MoodEnum.GRUMBOT -> painterResource(R.drawable.grumbot)
     }
 
-    @Composable
     fun getHappierMood(mood: MoodEnum) = when(mood){
-        MoodEnum.NEUTRAL -> painterResource(R.drawable.neutralhappy)
-        MoodEnum.NEUTRAL_HAPPY -> painterResource(R.drawable.happy)
-        MoodEnum.BLINK -> painterResource(R.drawable.veryhappy)
-        MoodEnum.HAPPY -> painterResource(R.drawable.veryhappy)
-        MoodEnum.VERY_HAPPY -> painterResource(R.drawable.uwuheart)
-        MoodEnum.UWU -> painterResource(R.drawable.uwuheart)
-        MoodEnum.UWU_HEART -> painterResource(R.drawable.uwuheart)
-        MoodEnum.WORRIED -> painterResource(R.drawable.neutral)
-        MoodEnum.SAD -> painterResource(R.drawable.worried)
-        MoodEnum.SOBBING -> painterResource(R.drawable.sad)
-        MoodEnum.CRYING -> painterResource(R.drawable.sobbing)
-        MoodEnum.DEAD -> painterResource(R.drawable.dead)
-        MoodEnum.SHOCKED -> painterResource(R.drawable.neutral)
-        MoodEnum.ASTONISHED -> painterResource(R.drawable.shocked)
-        MoodEnum.ANGRY -> painterResource(R.drawable.angry)
-        MoodEnum.GRUMBOT -> painterResource(R.drawable.grumbot)//make happygrumbot
+        MoodEnum.NEUTRAL -> MoodEnum.NEUTRAL_HAPPY
+        MoodEnum.NEUTRAL_HAPPY -> MoodEnum.HAPPY
+        MoodEnum.BLINK -> MoodEnum.VERY_HAPPY
+        MoodEnum.HAPPY -> MoodEnum.VERY_HAPPY
+        MoodEnum.VERY_HAPPY -> MoodEnum.UWU_HEART
+        MoodEnum.UWU -> MoodEnum.UWU_HEART
+        MoodEnum.UWU_HEART -> MoodEnum.UWU_HEART
+        MoodEnum.WORRIED -> MoodEnum.NEUTRAL
+        MoodEnum.SAD -> MoodEnum.WORRIED
+        MoodEnum.SOBBING -> MoodEnum.SAD
+        MoodEnum.CRYING -> MoodEnum.SOBBING
+        MoodEnum.DEAD -> MoodEnum.DEAD
+        MoodEnum.SHOCKED -> MoodEnum.NEUTRAL
+        MoodEnum.ASTONISHED -> MoodEnum.SHOCKED
+        MoodEnum.ANGRY -> MoodEnum.SAD
+        MoodEnum.GRUMBOT -> MoodEnum.GRUMBOT
+    }
+
+    fun getMoodFromHealth(health: Int) = when(health){
+            6 -> MoodEnum.HAPPY
+            5 -> MoodEnum.NEUTRAL_HAPPY
+            4 -> MoodEnum.NEUTRAL
+            3 -> MoodEnum.WORRIED
+            2 -> MoodEnum.SAD
+            1 -> MoodEnum.CRYING
+            else -> MoodEnum.DEAD
     }
 }

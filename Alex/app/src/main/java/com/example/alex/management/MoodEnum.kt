@@ -1,4 +1,4 @@
-package com.example.alex.alexMood
+package com.example.alex.management
 
 enum class MoodEnum {
     NEUTRAL,
