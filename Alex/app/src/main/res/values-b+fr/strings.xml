@@ -2,5 +2,10 @@
 <resources>
     <string name="app_name">Alex</string>
     <string name="greetings">Salut, moi c\'est Alex !</string>
-    <string name="typeHelp">Tapez \'Help\' pour commencer.</string>
+    <string name="typeHelp">Tapez \'help\' pour commencer.</string>
+    <string name="helpHint">Tapez \'&lt;commande&gt; -h\' pour plus de détails</string>
+    <string name="youtoo">Moi aussi !</string>
+    <string name="thanks">Merci !</string>
+    <string name="mayor">J\'ai besoin d\'un budget !</string>
+    <string name="bePolite">Restez poli !</string>
 </resources>

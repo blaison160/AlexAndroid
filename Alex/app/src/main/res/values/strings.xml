@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">Alex</string>
     <string name="greetings">Hi, I am Alex !</string>
-    <string name="typeHelp">Type \'Help\' to get started.</string>
+    <string name="typeHelp">Type \'help\' to get started.</string>
+    <string name="helpHint">Type \'&lt;command&gt; -h\' to get more details</string>
+    <string name="youtoo">I love you too !</string>
+    <string name="thanks">Thank you !</string>
+    <string name="mayor">I need budget !</string>
+    <string name="bePolite">Be polite !</string>
+
 </resources>

@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import com.example.alex.R
 
-object Health {
+object HealthFunctions {
 
     @Composable
     fun getHealthRepresentation(health: Int) = when(health){
