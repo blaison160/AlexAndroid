@@ -6,7 +6,7 @@ import kotlin.random.Random
 
 object ShellFunctions {
 
-    fun checkUserInput(input: String, mood: MoodEnum, context: Context): Pair<List<String>, MoodEnum>{
+    fun checkUserInput(input: String, mood: MoodEnum?, context: Context): Pair<List<String>, MoodEnum>{
         return when(input) {
             "help" -> displayCommands(mood, context)
             "update" -> updateAlex()
@@ -23,8 +23,9 @@ object ShellFunctions {
     }
 
 
-    private fun displayCommands(mood: MoodEnum, context: Context): Pair<List<String>, MoodEnum> {
+    private fun displayCommands(mood: MoodEnum?, context: Context): Pair<List<String>, MoodEnum> {
         val listOfCommands = listOf("debug","hello","update","upgrade", context.resources.getString(R.string.helpHint))
+        if(mood == null){return Pair(listOfCommands, MoodEnum.DEAD)}
         return Pair(listOfCommands, mood)
     }
 
@@ -40,12 +41,13 @@ object ShellFunctions {
         TODO("Not yet implemented")
     }
 
-       private fun randomReply(mood: MoodEnum): Pair<List<String>, MoodEnum> {
+       private fun randomReply(mood: MoodEnum?): Pair<List<String>, MoodEnum> {
         TODO("Not yet implemented")
     }
 
     private fun mumboJumbo(context: Context): Pair<List<String>, MoodEnum> {
         return Pair(listOf("Subscribe to Mumbo Jumbo !"), MoodEnum.GRUMBOT)
+        //todo
     }
 
     private fun uwu(): Pair<List<String>, MoodEnum> {
@@ -77,7 +79,6 @@ object ShellFunctions {
     }
 
     private fun checkForBadWords(input: String, context: Context): Pair<List<String>, MoodEnum> {
-        val listToReturn = listOf<String>()
         return when(input){
             "bitch" -> angryFace(context)
             "sonofabitch" -> angryFace(context)
@@ -88,6 +89,7 @@ object ShellFunctions {
             "encule" -> angryFace(context)
             "asshole" -> angryFace(context)
             "bastard" -> angryFace(context)
+            "fuckyou" -> angryFace(context)
             else -> doNotUnderstand()
         }
     }

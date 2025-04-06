@@ -6,7 +6,7 @@ import com.example.alex.R
 
 object MoodFunctions {
     @Composable
-    fun getMoodRepresentation(mood: MoodEnum) = when(mood){
+    fun getMoodRepresentation(mood: MoodEnum?) = when(mood){
             MoodEnum.NEUTRAL -> painterResource(R.drawable.neutral)
             MoodEnum.NEUTRAL_HAPPY -> painterResource(R.drawable.neutralhappy)
             MoodEnum.BLINK -> painterResource(R.drawable.blink)
@@ -23,9 +23,10 @@ object MoodFunctions {
             MoodEnum.ASTONISHED -> painterResource(R.drawable.astonished)
             MoodEnum.ANGRY -> painterResource(R.drawable.angry)
             MoodEnum.GRUMBOT -> painterResource(R.drawable.grumbot)
+            null -> painterResource(R.drawable.dead)
     }
 
-    fun getHappierMood(mood: MoodEnum) = when(mood){
+    fun getHappierMood(mood: MoodEnum?) = when(mood){
         MoodEnum.NEUTRAL -> MoodEnum.NEUTRAL_HAPPY
         MoodEnum.NEUTRAL_HAPPY -> MoodEnum.HAPPY
         MoodEnum.BLINK -> MoodEnum.VERY_HAPPY
@@ -42,6 +43,7 @@ object MoodFunctions {
         MoodEnum.ASTONISHED -> MoodEnum.SHOCKED
         MoodEnum.ANGRY -> MoodEnum.SAD
         MoodEnum.GRUMBOT -> MoodEnum.GRUMBOT
+        null -> MoodEnum.DEAD
     }
 
     fun getMoodFromHealth(health: Int) = when(health){

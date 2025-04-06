@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -47,6 +48,7 @@ import com.example.alex.management.HealthFunctions.getHealthRepresentation
 import com.example.alex.management.MoodEnum
 import com.example.alex.management.MoodFunctions.getMoodRepresentation
 import com.example.alex.management.MoodFunctions
+import com.example.alex.management.MoodFunctions.getMoodFromHealth
 import com.example.alex.management.MoodViewModel
 import com.example.alex.management.ShellFunctions.checkUserInput
 import com.example.alex.management.ShellViewModel
@@ -75,14 +77,15 @@ fun Greeting(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun DisplayMainPage(modifier: Modifier, currentMood: MoodViewModel = viewModel(), shell: ShellViewModel = viewModel()){
+fun DisplayMainPage(modifier: Modifier, moodViewModel: MoodViewModel = viewModel(), shell: ShellViewModel = viewModel()){
     val context = LocalContext.current
     val health = rememberSaveable { mutableIntStateOf(6) }
     val maxVersionSupportTime = 32
     val versionSupportTime = rememberSaveable { mutableIntStateOf(maxVersionSupportTime) }
     val maxFoodBar = 8
     val hunger = rememberSaveable { mutableIntStateOf(maxFoodBar)}
-    currentMood.updateCurrentMood(MoodFunctions.getMoodFromHealth(health.intValue))
+    val updateMood = rememberSaveable { mutableStateOf(true) }
+    if(updateMood.value){ moodViewModel.updateCurrentMood(getMoodFromHealth(health.intValue)) }
     val shellEnabled = rememberSaveable { mutableStateOf(false) }
     shell.updateShellLines(listOf(stringResource(R.string.greetings),stringResource(R.string.typeHelp)))
     Column(
@@ -93,19 +96,17 @@ fun DisplayMainPage(modifier: Modifier, currentMood: MoodViewModel = viewModel()
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box{
-                DisplayFace(currentMood, modifier)
+                DisplayFace(moodViewModel, modifier)
             }
             Column {
                 DisplayHeart(health, modifier)
 
             }
         }
-        DisplayInteractionsMenu(currentMood, context, shellEnabled, health, hunger, versionSupportTime, modifier)
-        Box(
-            //modifier.fillMaxHeight(0.6F)
-        ) {
+        DisplayInteractionsMenu(moodViewModel, context, shellEnabled, health, hunger, modifier)
+        Box {
             DisplayActivity(
-                currentMood,
+                moodViewModel,
                 context,
                 versionSupportTime,
                 shellEnabled,
@@ -143,8 +144,8 @@ fun DisplayVersionBar(versionSupportTime: MutableIntState, modifier: Modifier) {
 }
 
 @Composable
-fun DisplayFace(currentMood: MoodViewModel, modifier: Modifier) {
-    val expression = getMoodRepresentation(currentMood.getCurrentMood())
+fun DisplayFace(mood: MoodViewModel, modifier: Modifier) {
+    val expression = getMoodRepresentation(mood.currentMood.observeAsState().value)
     Box{
         Image(
             painter = painterResource(R.drawable.background),
@@ -162,21 +163,21 @@ fun DisplayFace(currentMood: MoodViewModel, modifier: Modifier) {
 }
 
 @Composable
-fun DisplayInteractionsMenu(currentMood: MoodViewModel, context: Context, shellEnabled: MutableState<Boolean>, health: MutableIntState, hunger: MutableIntState, version: MutableIntState, modifier: Modifier) {
+fun DisplayInteractionsMenu(mood: MoodViewModel, context: Context, shellEnabled: MutableState<Boolean>, health: MutableIntState, hunger: MutableIntState, modifier: Modifier) {
     val feedEnabled = rememberSaveable { mutableStateOf(true) }//todo : check for food & change icon
+    val initialMood = mood.currentMood.observeAsState().value
     Row{
         Button(
             enabled = feedEnabled.value,
             onClick = {
                 feedEnabled.value = false
-                val initialMood = currentMood.getCurrentMood()
-                currentMood.updateCurrentMood(MoodFunctions.getHappierMood(initialMood)) //get the happier face
+                mood.updateCurrentMood(MoodFunctions.getHappierMood(initialMood)) //get the happier face
                 val handler = Handler(Looper.getMainLooper())
                 val runnable = Runnable{
-                    currentMood.updateCurrentMood(initialMood)
+                    mood.updateCurrentMood(getMoodFromHealth(health.intValue))
                     feedEnabled.value=true
                 }
-                handler.postDelayed(runnable,2000)
+                handler.postDelayed(runnable,20000)
             },
             shape = RectangleShape,
             border = BorderStroke(4.dp, MaterialTheme.colorScheme.secondary)
@@ -236,6 +237,7 @@ fun DisplayShell(
 ) {
     val shellContent = shell.shellLines
     val input = rememberSaveable { mutableStateOf(("")) }
+    val initialMood = mood.currentMood.observeAsState().value
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -255,7 +257,7 @@ fun DisplayShell(
             )
             Button(
                 onClick = {
-                    runCommand(input.value,shell, mood, context)
+                    runCommand(input.value,shell, mood, initialMood, context)
                     input.value = ""
                 }
             ) {
@@ -283,7 +285,7 @@ fun DisplayShell(
     }
 }
 
-fun runCommand(input: String, shell: ShellViewModel, mood: MoodViewModel, context: Context){
+fun runCommand(input: String, shell: ShellViewModel, mood: MoodViewModel, initialMood: MoodEnum?, context: Context){
     val transformedInput = input.replace(" ","")
         .replace("'","")
         .replace("é","e")
@@ -291,7 +293,7 @@ fun runCommand(input: String, shell: ShellViewModel, mood: MoodViewModel, contex
         .replace("?","")
         .lowercase()
     val linesToDisplay = mutableListOf("[~]$ $input")
-    val result = checkUserInput(transformedInput, mood.getCurrentMood(), context)
+    val result = checkUserInput(transformedInput, initialMood, context)
     mood.updateCurrentMood(result.second)
     linesToDisplay.addAll(result.first)
     shell.updateShellLines(linesToDisplay)

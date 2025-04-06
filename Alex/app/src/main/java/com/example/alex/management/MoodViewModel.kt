@@ -1,15 +1,21 @@
 package com.example.alex.management
 
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 
-class MoodViewModel : ViewModel() {
-    var currentMood = mutableStateOf(MoodEnum.NEUTRAL)
-        private set
-    fun updateCurrentMood(newMood: MoodEnum){
-        currentMood.value = newMood
+class MoodViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
+
+    companion object {
+        private const val CURRENT_MOOD_KEY = "current_mood"
     }
-    fun getCurrentMood(): MoodEnum {
-        return currentMood.value
+
+    private val _currentMood = savedStateHandle.getLiveData<MoodEnum>(CURRENT_MOOD_KEY, MoodEnum.NEUTRAL)
+    val currentMood: LiveData<MoodEnum> = _currentMood
+
+    fun updateCurrentMood(newMood: MoodEnum) {
+        _currentMood.value = newMood
+        savedStateHandle[CURRENT_MOOD_KEY] = newMood
     }
+
 }
